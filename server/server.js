@@ -3,8 +3,8 @@ var bodyParser = require('body-parser');
 //body-parser is going to take our JSON and convert it into an object attaching it to the request object of the app
 
 var mongoose = require('./db/mongoose.js')
-var {Todo} = require('./models/todos.js');
-var {User} = require('./models/users.js')
+var {Todo} = require('./models/todo.js');
+var {User} = require('./models/user.js')
 
 
 var app = express();
@@ -35,3 +35,6 @@ app.post('/todos', (req, res) =>{
 app.listen(3000,()=>{
   console.log('Started on port 3000');
 })
+
+
+module.exports = {app};
