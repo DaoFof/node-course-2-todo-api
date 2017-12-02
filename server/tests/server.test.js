@@ -4,8 +4,19 @@ const request = require('supertest');
 const {app} =  require('./../server');
 const {Todo} = require('./../models/todo');
 
+const todos =[{
+  text: "First test todo"
+},{
+  text: "Second test todo"
+}];
+
 beforeEach((done)=>{
   Todo.remove({}).then(()=>{
+    return Todo.insertMany(todos);
+    /*
+    insertMany() is used to insert many document cast in an array in a collection
+    */
+  }).then(()=>{
     done();
   });/*This is going to delete everything in the database*/
 });
@@ -32,7 +43,7 @@ describe('POST /todos', ()=>{
           return done(err);//this is going to wrap up the test and print the err to the screen
         }
 
-        Todo.find().then((todos)=>{
+        Todo.find({text}).then((todos)=>{
           expect(todos.length).toBe(1);// expecting that the collection has one element
           expect(todos[0].text).toBe(text);//expecting single element of collection equal to the text object defined above
           done();
@@ -50,9 +61,21 @@ describe('POST /todos', ()=>{
         }
 
         Todo.find().then((todos)=>{
-          expect(todos.length).toBe(0);
+          expect(todos.length).toBe(2);
           done();
         }).catch((e) => done(e));
       });
+  });
+});
+
+describe('GET /todos', ()=>{
+  it('should get all todos', (done)=>{
+    request(app)
+      .get('/todos')
+      .expect(200)
+      .expect((res) =>{
+        expect(res.body.todos.length).toBe(2)
+      })
+      .end(done);
   });
 });
