@@ -9,7 +9,7 @@ var {User} = require('./models/user.js')
 
 
 var app = express();
-
+const port = process.env.PORT || 3000;
 app.use(bodyParser.json()); // return value from this json() is a function and it is the middleware that we want to pass to express
 
 app.post('/todos', (req, res) =>{
@@ -54,8 +54,8 @@ and we can access this variable inside the req variable in the callback.
 The variable is available inside req.params which is a key value objects.
 */
 
-app.listen(3000,()=>{
-  console.log('Started on port 3000');
+app.listen(port,()=>{
+  console.log(`Started on port ${port}`);
 })
 
 
