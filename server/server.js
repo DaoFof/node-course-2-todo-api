@@ -1,7 +1,7 @@
 var express =  require('express');
 var bodyParser = require('body-parser');
 //body-parser is going to take our JSON and convert it into an object attaching it to the request object of the app
-var {ObjectId} = require ('mongodb');
+var {ObjectID} = require ('mongodb');
 
 var mongoose = require('./db/mongoose.js')
 var {Todo} = require('./models/todo.js');
@@ -34,7 +34,7 @@ app.get('/todos', (req, res)=>{
 app.get('/todos/:id',(req, res)=>{
   var id = req.params.id;
 
-  if(!ObjectId.isValid(id)){
+  if(!ObjectID.isValid(id)){
     return res.status(404).send();
   }
   Todo.findById(id).then((todo)=>{
