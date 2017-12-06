@@ -54,6 +54,22 @@ and we can access this variable inside the req variable in the callback.
 The variable is available inside req.params which is a key value objects.
 */
 
+app.delete('/todos/:id',(req, res)=>{
+  var id = req.params.id;
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send();
+  }
+  Todo.findByIdAndRemove(id).then((todo)=>{
+    if(!todo){
+      return res.status(404).send();
+    }
+    res.send(todo);
+  }).catch((e)=>{
+    res.status(400).send();
+  });
+});//delete is used to delete record inside of our collection
+
+
 app.listen(port,()=>{
   console.log(`Started on port ${port}`);
 })
