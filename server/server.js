@@ -1,7 +1,8 @@
-var express =  require('express');
-var bodyParser = require('body-parser');
+const _ =  require('lodash');
+const express =  require('express');
+const bodyParser = require('body-parser');
 //body-parser is going to take our JSON and convert it into an object attaching it to the request object of the app
-var {ObjectID} = require ('mongodb');
+const {ObjectID} = require ('mongodb');
 
 var mongoose = require('./db/mongoose.js')
 var {Todo} = require('./models/todo.js');
@@ -70,9 +71,44 @@ app.delete('/todos/:id',(req, res)=>{
 });//delete is used to delete record inside of our collection
 
 
+app.patch('/todos/:id', (req, res)=>{
+  var id = req.params.id;
+  var body = _.pick(req.body, ['text', 'completed']);
+  /*_.pick() Creates an object composed of the picked object properties.
+  var object = { 'a': 1, 'b': '2', 'c': 3 };
+  _.pick(object, ['a', 'c']);
+  // => { 'a': 1, 'c': 3 }
+  */
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send();
+  }
+
+  if(_.isBoolean(body.completed) && body.completed){
+    body.completedAt = new Date().getTime();
+  }else{
+    body.completed = false;
+    body.completedAt = null; // to remove from database
+  }
+  Todo.findByIdAndUpdate(id,{$set : body}, {new : true}).then((todo)=>{
+
+    if(!todo){
+      return res.status(404).send();
+    }
+
+    res.send({todo});
+  }).catch((e)=>{
+    res.status(400).send();
+  });
+
+});
+
+/*
+HTTP PATCH method is what we use when we are going to update a resource
+*/
+
+
 app.listen(port,()=>{
   console.log(`Started on port ${port}`);
-})
-
+});
 
 module.exports = {app};
