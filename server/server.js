@@ -1,3 +1,5 @@
+require('./config/config');
+
 const _ =  require('lodash');
 const express =  require('express');
 const bodyParser = require('body-parser');
@@ -10,7 +12,7 @@ var {User} = require('./models/user.js')
 
 
 var app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 app.use(bodyParser.json()); // return value from this json() is a function and it is the middleware that we want to pass to express
 
 app.post('/todos', (req, res) =>{
