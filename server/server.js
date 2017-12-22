@@ -17,9 +17,10 @@ app.use(bodyParser.json()); // return value from this json() is a function and i
 
 
 
-app.post('/todos', (req, res) =>{
+app.post('/todos',authenticate, (req, res) =>{
   var todo = new Todo({
-    text: req.body.text
+    text: req.body.text,
+    _creator: req.user._id
   });
   todo.save().then((doc)=>{
     res.send(doc);
@@ -28,21 +29,26 @@ app.post('/todos', (req, res) =>{
   });
 });//app.post id used to post data to our server
 
-app.get('/todos', (req, res)=>{
-  Todo.find().then((todos)=>{
+app.get('/todos', authenticate, (req, res)=>{
+  Todo.find({
+    _creator: req.user._id// find only todos where the creator is the one log in
+  }).then((todos)=>{
     res.send({todos});
   },(e)=>{
     res.status(400).send(e);
   });
 });
 
-app.get('/todos/:id',(req, res)=>{
+app.get('/todos/:id',authenticate,(req, res)=>{
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)){
     return res.status(404).send();
   }
-  Todo.findById(id).then((todo)=>{
+  Todo.findOne({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo)=>{
     if(!todo){
       return res.status(404).send();
     }
@@ -59,12 +65,15 @@ and we can access this variable inside the req variable in the callback.
 The variable is available inside req.params which is a key value objects.
 */
 
-app.delete('/todos/:id',(req, res)=>{
+app.delete('/todos/:id',authenticate, (req, res)=>{
   var id = req.params.id;
   if(!ObjectID.isValid(id)){
     return res.status(404).send();
   }
-  Todo.findByIdAndRemove(id).then((todo)=>{
+  Todo.findOneAndRemove({
+    _id:id,
+    _creator: req.user._id
+  }).then((todo)=>{
     if(!todo){
       return res.status(404).send();
     }
@@ -75,7 +84,7 @@ app.delete('/todos/:id',(req, res)=>{
 });//delete is used to delete record inside of our collection
 
 
-app.patch('/todos/:id', (req, res)=>{
+app.patch('/todos/:id',authenticate,  (req, res)=>{
   var id = req.params.id;
   var body = _.pick(req.body, ['text', 'completed']);
   /*_.pick() Creates an object composed of the picked object properties.
@@ -93,7 +102,7 @@ app.patch('/todos/:id', (req, res)=>{
     body.completed = false;
     body.completedAt = null; // to remove from database
   }
-  Todo.findByIdAndUpdate(id,{$set : body}, {new : true}).then((todo)=>{
+  Todo.findOneAndUpdate({_id : id, _creator: req.user._id},{$set : body}, {new : true}).then((todo)=>{
 
     if(!todo){
       return res.status(404).send();
